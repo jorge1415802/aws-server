@@ -1,0 +1,46 @@
+services:
+  # Base de Datos Relacional
+  postgres:
+    image: postgres:16-alpine # Versión estable y ligera en 2026
+    container_name: nest-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: my_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Cache y Message Broker para Microservicios
+  redis:
+    image: redis:7-alpine
+    container_name: nest-redis
+    ports:
+      - "6379:6379"
+
+  # Simulador de AWS (S3, Lambda, SQS, SNS)
+  localstack:
+    image: localstack/localstack:3.0 # Versión actual en 2026
+    container_name: nest-aws-local
+    ports:
+      - "4566:4566"            # Puerto único para todos los servicios AWS
+    environment:
+      # - SERVICES=s3,lambda,sqs,sns  # Servicios que queremos habilitar
+      - DEBUG=1
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LAMBDA_DOCKER_NETWORK=nest_network
+    volumes:
+      - "./localstack_data:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - nest_network
+  
+networks:
+  nest_network:
+    external: false
+    name: nest_network
+
+volumes:
+  postgres_data:
+  localstack_data:

@@ -1,0 +1,93 @@
+service: nest-serverless-app
+
+plugins:
+  - serverless-esbuild
+  - serverless-offline
+
+build:
+  esbuild: false # Desactiva el motor nativo de la v4 para usar el plugin
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: dev
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL}
+    S3_BUCKET_NAME: "fotos-bucket-IngCompJorge-2026"
+    NODE_ENV: "production"
+    SQS_QUEUE_URL: !Ref MyQueue
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action: [sqs:ReceiveMessage, sqs:DeleteMessage, sqs:GetQueueAttributes, sqs:SendMessage]
+          Resource: !GetAtt MyQueue.Arn
+        - Effect: Allow
+          Action: [s3:PutObject]
+          Resource: "arn:aws:s3:::fotos-bucket-IngCompJorge-2026/*"
+
+package:
+  individually: true
+  patterns:
+    - '!**'
+    - 'package.json'
+    - 'node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node'
+    - 'node_modules/.prisma/client/schema.prisma'
+    - 'node_modules/@prisma/client/**'
+    - 'node_modules/@prisma/adapter-pg/**'
+    - 'node_modules/pg*/**'
+    - 'node_modules/postgres*/**'
+    - 'node_modules/xtend/**'
+
+functions:
+  main:
+    handler: src/lambdas/api.handler
+    events:
+      - http: { method: any, path: '/{proxy+}' }
+  imageProcessor:
+    handler: src/lambdas/image-processor.handler
+    events:
+      - sqs:
+          arn: !GetAtt MyQueue.Arn
+          batchSize: 5
+
+resources:
+  Resources:
+    MyQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: procesar-imagen-cola.fifo
+        FifoQueue: true
+        ContentBasedDeduplication: true
+
+custom:
+  serverless-offline:
+    httpPort: 3000
+  esbuild:
+    bundle: true
+    minify: true
+    platform: 'node'
+    target: 'node20'
+    external:
+      - '@prisma/client'
+      - '.prisma'
+      - '@aws-sdk/*'
+      - 'class-transformer'
+      - 'class-validator'
+      - '@nestjs/microservices'
+      - '@nestjs/websockets'
+      - '@nestjs/websockets/socket-module'
+      - '@grpc/grpc-js'
+      - '@grpc/proto-loader'
+      - 'kafkajs'
+      - 'mqtt'
+      - 'amqplib'
+      - 'amqp-connection-manager'
+      - 'redis'
+      - 'ioredis'
+      - 'nats'
+      - 'cache-manager'
+    exclude: 
+      - '*'
+    nativeZip: true
