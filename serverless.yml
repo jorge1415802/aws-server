@@ -70,8 +70,8 @@ custom:
     platform: 'node'
     target: 'node20'
     external:
-      - '@prisma/client'
-      - '.prisma'
+      # - '@prisma/client'
+      # - '.prisma'
       - '@aws-sdk/*'
       - 'class-transformer'
       - 'class-validator'

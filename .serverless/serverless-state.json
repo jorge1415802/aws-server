@@ -167,7 +167,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-55341aaa-4275",
-                "S3Key": "serverless/nest-serverless-app/dev/1769784300199-2026-01-30T14:45:00.199Z/main.zip"
+                "S3Key": "serverless/nest-serverless-app/dev/1769785736469-2026-01-30T15:08:56.469Z/main.zip"
               },
               "Handler": "src/lambdas/api.handler",
               "Runtime": "nodejs20.x",
@@ -200,7 +200,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-55341aaa-4275",
-                "S3Key": "serverless/nest-serverless-app/dev/1769784300199-2026-01-30T14:45:00.199Z/imageProcessor.zip"
+                "S3Key": "serverless/nest-serverless-app/dev/1769785736469-2026-01-30T15:08:56.469Z/imageProcessor.zip"
               },
               "Handler": "src/lambdas/image-processor.handler",
               "Runtime": "nodejs20.x",
@@ -228,24 +228,24 @@
               "ImageProcessorLogGroup"
             ]
           },
-          "MainLambdaVersionFJzEDe1GbJCi4uf6fYPKfadSneAuY3e9E4cAuAfE": {
+          "MainLambdaVersionwIn56udtghwC0ae1t3WN2FCrD0rCBmy79ShNe8JWw": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "MainLambdaFunction"
               },
-              "CodeSha256": "uujgCHU3ZwzCAjcB6pHFAKK4tdhzsplVatO8nwHpyTk="
+              "CodeSha256": "qUhfg2WN0fSyvqvQMKIqxcCqL6c/AXC/egZTFSqPHuA="
             }
           },
-          "ImageProcessorLambdaVersiona6Sovw2xXBFrLJyh2DQRgOQTYdk1GPOWmlQ9ewvkc": {
+          "ImageProcessorLambdaVersionoDCrMqhx2QSAcakjRAKqTpqPKs5mFq7IwK4oWwN48": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ImageProcessorLambdaFunction"
               },
-              "CodeSha256": "BFSkvtN6AFFkYQqrzmCXVJvMjR5Fk/wCEoCD2k+sFRo="
+              "CodeSha256": "sefD5psMk+IAznLyOydMK9HzMErTBeMS3DO2e+Ubgpk="
             }
           },
           "ApiGatewayRestApi": {
@@ -321,7 +321,7 @@
               "MainLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1769784289613": {
+          "ApiGatewayDeployment1769785726137": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -411,7 +411,7 @@
           "MainLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "MainLambdaVersionFJzEDe1GbJCi4uf6fYPKfadSneAuY3e9E4cAuAfE"
+              "Ref": "MainLambdaVersionwIn56udtghwC0ae1t3WN2FCrD0rCBmy79ShNe8JWw"
             },
             "Export": {
               "Name": "sls-nest-serverless-app-dev-MainLambdaFunctionQualifiedArn"
@@ -420,7 +420,7 @@
           "ImageProcessorLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ImageProcessorLambdaVersiona6Sovw2xXBFrLJyh2DQRgOQTYdk1GPOWmlQ9ewvkc"
+              "Ref": "ImageProcessorLambdaVersionoDCrMqhx2QSAcakjRAKqTpqPKs5mFq7IwK4oWwN48"
             },
             "Export": {
               "Name": "sls-nest-serverless-app-dev-ImageProcessorLambdaFunctionQualifiedArn"
@@ -466,8 +466,6 @@
         "platform": "node",
         "target": "node20",
         "external": [
-          "@prisma/client",
-          ".prisma",
           "@aws-sdk/*",
           "class-transformer",
           "class-validator",
@@ -516,7 +514,7 @@
         "timeout": 6,
         "runtime": "nodejs20.x",
         "vpc": {},
-        "versionLogicalId": "MainLambdaVersionFJzEDe1GbJCi4uf6fYPKfadSneAuY3e9E4cAuAfE"
+        "versionLogicalId": "MainLambdaVersionwIn56udtghwC0ae1t3WN2FCrD0rCBmy79ShNe8JWw"
       },
       "imageProcessor": {
         "handler": "src/lambdas/image-processor.handler",
@@ -538,7 +536,7 @@
         "timeout": 6,
         "runtime": "nodejs20.x",
         "vpc": {},
-        "versionLogicalId": "ImageProcessorLambdaVersiona6Sovw2xXBFrLJyh2DQRgOQTYdk1GPOWmlQ9ewvkc"
+        "versionLogicalId": "ImageProcessorLambdaVersionoDCrMqhx2QSAcakjRAKqTpqPKs5mFq7IwK4oWwN48"
       }
     },
     "resources": {
@@ -602,7 +600,7 @@
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "serverless/nest-serverless-app/dev/1769784300199-2026-01-30T14:45:00.199Z",
+    "artifactDirectoryName": "serverless/nest-serverless-app/dev/1769785736469-2026-01-30T15:08:56.469Z",
     "artifact": ""
   }
 }

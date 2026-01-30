@@ -10,7 +10,11 @@ import { FileModule } from './files/file/file.module';
 @Global()
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: `.env` }),
+    ConfigModule.forRoot({
+        isGlobal: true,
+        // envFilePath: `.env` 
+        ignoreEnvFile: process.env.NODE_ENV === 'production',
+    }),
     PrismaModule,
     FileModule
     
@@ -21,7 +25,7 @@ import { FileModule } from './files/file/file.module';
     {
       provide: 'S3_CLIENT',
       useFactory: () => new S3Client({
-        region: 'us-east-1',
+        // region: 'us-east-1',
         // endpoint: 'http://localhost:4566',
         // forcePathStyle: true,
         // credentials: { accessKeyId: 'test', secretAccessKey: 'test' },
@@ -30,7 +34,7 @@ import { FileModule } from './files/file/file.module';
     {
       provide: 'SQS_CLIENT',
       useFactory: () => new SQSClient({
-        region: 'us-east-1',
+        // region: 'us-east-1',
         // endpoint: 'http://localhost:4566',
         // credentials: { accessKeyId: 'test', secretAccessKey: 'test' },
       }),
