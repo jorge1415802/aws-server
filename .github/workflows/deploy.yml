@@ -1,0 +1,37 @@
+name: Deploy NestJS Serverless
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar NestJS
+        run: npm run build
+
+      - name: Serverless Deploy
+        uses: serverless/github-action@v4
+        with:
+          args: deploy --stage ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DATABASE_URL_dev: ${{ secrets.DATABASE_URL_DEV }}
+          DATABASE_URL_staging: ${{ secrets.DATABASE_URL_STAGING }}
+          S3_BUCKET_NAME: "fotos-bucket-ingcompjorge-2026-${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}"
