@@ -72,6 +72,7 @@ resources:
         ContentBasedDeduplication: true
     FotosBucket:
       Type: AWS::S3::Bucket
+      DeletionPolicy: Retain
       Properties:
         BucketName: ${self:provider.environment.S3_BUCKET_NAME}
     MyDeadLetterQueue:
