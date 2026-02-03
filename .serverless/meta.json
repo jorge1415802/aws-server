@@ -15,12 +15,12 @@
       "provider": {
         "name": "aws",
         "runtime": "nodejs20.x",
+        "stage": "staging",
         "region": "us-east-1",
-        "stage": "dev",
         "environment": {
-          "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-summer-mountain-ahpmekhk-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-          "S3_BUCKET_NAME": "fotos-bucket-IngCompJorge-2026",
-          "NODE_ENV": "production",
+          "NODE_ENV": "staging",
+          "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-odd-truth-ah146piu-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+          "S3_BUCKET_NAME": "fotos-ingcompjorge-stage",
           "SQS_QUEUE_URL": {
             "Ref": "MyQueue"
           }
@@ -36,19 +36,31 @@
                   "sqs:GetQueueAttributes",
                   "sqs:SendMessage"
                 ],
-                "Resource": {
-                  "Fn::GetAtt": [
-                    "MyQueue",
-                    "Arn"
-                  ]
-                }
+                "Resource": [
+                  {
+                    "Fn::GetAtt": [
+                      "MyQueue",
+                      "Arn"
+                    ]
+                  },
+                  {
+                    "Fn::GetAtt": [
+                      "MyDeadLetterQueue",
+                      "Arn"
+                    ]
+                  }
+                ]
               },
               {
                 "Effect": "Allow",
                 "Action": [
                   "s3:PutObject"
                 ],
-                "Resource": "arn:aws:s3:::fotos-bucket-IngCompJorge-2026/*"
+                "Resource": [
+                  {
+                    "Fn::Sub": "arn:aws:s3:::fotos-ingcompjorge-stage/*"
+                  }
+                ]
               }
             ]
           }
@@ -61,13 +73,13 @@
             "MainLogGroup": {
               "Type": "AWS::Logs::LogGroup",
               "Properties": {
-                "LogGroupName": "/aws/lambda/nest-serverless-app-dev-main"
+                "LogGroupName": "/aws/lambda/nest-serverless-app-staging-main"
               }
             },
             "ImageProcessorLogGroup": {
               "Type": "AWS::Logs::LogGroup",
               "Properties": {
-                "LogGroupName": "/aws/lambda/nest-serverless-app-dev-imageProcessor"
+                "LogGroupName": "/aws/lambda/nest-serverless-app-staging-imageProcessor"
               }
             },
             "IamRoleLambdaExecution": {
@@ -96,7 +108,7 @@
                         "-",
                         [
                           "nest-serverless-app",
-                          "dev",
+                          "staging",
                           "lambda"
                         ]
                       ]
@@ -113,7 +125,7 @@
                           ],
                           "Resource": [
                             {
-                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-dev*:*"
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-staging*:*"
                             }
                           ]
                         },
@@ -124,7 +136,7 @@
                           ],
                           "Resource": [
                             {
-                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-dev*:*:*"
+                              "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-staging*:*:*"
                             }
                           ]
                         },
@@ -136,19 +148,31 @@
                             "sqs:GetQueueAttributes",
                             "sqs:SendMessage"
                           ],
-                          "Resource": {
-                            "Fn::GetAtt": [
-                              "MyQueue",
-                              "Arn"
-                            ]
-                          }
+                          "Resource": [
+                            {
+                              "Fn::GetAtt": [
+                                "MyQueue",
+                                "Arn"
+                              ]
+                            },
+                            {
+                              "Fn::GetAtt": [
+                                "MyDeadLetterQueue",
+                                "Arn"
+                              ]
+                            }
+                          ]
                         },
                         {
                           "Effect": "Allow",
                           "Action": [
                             "s3:PutObject"
                           ],
-                          "Resource": "arn:aws:s3:::fotos-bucket-IngCompJorge-2026/*"
+                          "Resource": [
+                            {
+                              "Fn::Sub": "arn:aws:s3:::fotos-ingcompjorge-stage/*"
+                            }
+                          ]
                         },
                         {
                           "Effect": "Allow",
@@ -176,7 +200,7 @@
                     "-",
                     [
                       "nest-serverless-app",
-                      "dev",
+                      "staging",
                       {
                         "Ref": "AWS::Region"
                       },
@@ -191,18 +215,18 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-55341aaa-4275",
-                  "S3Key": "serverless/nest-serverless-app/dev/1769785736469-2026-01-30T15:08:56.469Z/main.zip"
+                  "S3Key": "serverless/nest-serverless-app/staging/1770066043978-2026-02-02T21:00:43.978Z/main.zip"
                 },
                 "Handler": "src/lambdas/api.handler",
                 "Runtime": "nodejs20.x",
-                "FunctionName": "nest-serverless-app-dev-main",
+                "FunctionName": "nest-serverless-app-staging-main",
                 "MemorySize": 1024,
                 "Timeout": 6,
                 "Environment": {
                   "Variables": {
-                    "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-summer-mountain-ahpmekhk-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-                    "S3_BUCKET_NAME": "fotos-bucket-IngCompJorge-2026",
-                    "NODE_ENV": "production",
+                    "NODE_ENV": "staging",
+                    "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-odd-truth-ah146piu-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+                    "S3_BUCKET_NAME": "fotos-ingcompjorge-stage",
                     "SQS_QUEUE_URL": {
                       "Ref": "MyQueue"
                     }
@@ -224,18 +248,18 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-55341aaa-4275",
-                  "S3Key": "serverless/nest-serverless-app/dev/1769785736469-2026-01-30T15:08:56.469Z/imageProcessor.zip"
+                  "S3Key": "serverless/nest-serverless-app/staging/1770066043978-2026-02-02T21:00:43.978Z/imageProcessor.zip"
                 },
                 "Handler": "src/lambdas/image-processor.handler",
                 "Runtime": "nodejs20.x",
-                "FunctionName": "nest-serverless-app-dev-imageProcessor",
+                "FunctionName": "nest-serverless-app-staging-imageProcessor",
                 "MemorySize": 1024,
                 "Timeout": 6,
                 "Environment": {
                   "Variables": {
-                    "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-summer-mountain-ahpmekhk-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-                    "S3_BUCKET_NAME": "fotos-bucket-IngCompJorge-2026",
-                    "NODE_ENV": "production",
+                    "NODE_ENV": "staging",
+                    "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-odd-truth-ah146piu-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+                    "S3_BUCKET_NAME": "fotos-ingcompjorge-stage",
                     "SQS_QUEUE_URL": {
                       "Ref": "MyQueue"
                     }
@@ -252,30 +276,30 @@
                 "ImageProcessorLogGroup"
               ]
             },
-            "MainLambdaVersionwIn56udtghwC0ae1t3WN2FCrD0rCBmy79ShNe8JWw": {
-              "Type": "AWS::Lambda::Version",
-              "DeletionPolicy": "Retain",
-              "Properties": {
-                "FunctionName": {
-                  "Ref": "MainLambdaFunction"
-                },
-                "CodeSha256": "qUhfg2WN0fSyvqvQMKIqxcCqL6c/AXC/egZTFSqPHuA="
-              }
-            },
-            "ImageProcessorLambdaVersionoDCrMqhx2QSAcakjRAKqTpqPKs5mFq7IwK4oWwN48": {
+            "ImageProcessorLambdaVersionL5yoWRgrjZ0eUmpKz2eVyCWmiA1BlJPCmbHuo3eUdfo": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "ImageProcessorLambdaFunction"
                 },
-                "CodeSha256": "sefD5psMk+IAznLyOydMK9HzMErTBeMS3DO2e+Ubgpk="
+                "CodeSha256": "y7wZDIe779qNEKgB6dsU/PFFBxrwJQqPiPjBgOiEiys="
+              }
+            },
+            "MainLambdaVersionWSFQRtMTSRKKOolMoo4buo9V5kEtSaV8kNvvPs0v6EY": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "MainLambdaFunction"
+                },
+                "CodeSha256": "Dka6ZJ4/PE77216HJDK9Vwq/3we0hf1CTi3xvcq6ARk="
               }
             },
             "ApiGatewayRestApi": {
               "Type": "AWS::ApiGateway::RestApi",
               "Properties": {
-                "Name": "dev-nest-serverless-app",
+                "Name": "staging-nest-serverless-app",
                 "EndpointConfiguration": {
                   "Types": [
                     "EDGE"
@@ -345,13 +369,13 @@
                 "MainLambdaPermissionApiGateway"
               ]
             },
-            "ApiGatewayDeployment1769785726137": {
+            "ApiGatewayDeployment1770066034683": {
               "Type": "AWS::ApiGateway::Deployment",
               "Properties": {
                 "RestApiId": {
                   "Ref": "ApiGatewayRestApi"
                 },
-                "StageName": "dev"
+                "StageName": "staging"
               },
               "DependsOn": [
                 "ApiGatewayMethodProxyVarAny"
@@ -419,9 +443,34 @@
             "MyQueue": {
               "Type": "AWS::SQS::Queue",
               "Properties": {
-                "QueueName": "procesar-imagen-cola.fifo",
+                "QueueName": "procesar-imagen-cola-staging.fifo",
                 "FifoQueue": true,
                 "ContentBasedDeduplication": true
+              }
+            },
+            "FotosBucket": {
+              "Type": "AWS::S3::Bucket",
+              "Properties": {
+                "BucketName": "fotos-ingcompjorge-stage"
+              }
+            },
+            "MyDeadLetterQueue": {
+              "Type": "AWS::SQS::Queue",
+              "Properties": {
+                "QueueName": "procesar-imagen-error-staging.fifo",
+                "FifoQueue": true,
+                "MessageRetentionPeriod": 1209600
+              }
+            },
+            "MyDashboard": {
+              "Type": "AWS::CloudWatch::Dashboard",
+              "Properties": {
+                "DashboardName": {
+                  "Fn::Sub": "Metrics-staging-App"
+                },
+                "DashboardBody": {
+                  "Fn::Sub": "{\n  \"widgets\": [\n    {\n      \"type\": \"metric\",\n      \"x\": 0, \"y\": 0, \"width\": 12, \"height\": 6,\n      \"properties\": {\n        \"metrics\": [\n          [ \"AWS/Lambda\", \"Invocations\", \"FunctionName\", \"nest-serverless-app-staging-main\" ],\n          [ \".\", \"Errors\", \".\", \".\" ]\n        ],\n        \"period\": 300,\n        \"stat\": \"Sum\",\n        \"region\": \"us-east-1\",\n        \"title\": \"API (staging): Invocaciones vs Errores\"\n      }\n    },\n    {\n      \"type\": \"metric\",\n      \"x\": 12, \"y\": 0, \"width\": 12, \"height\": 6,\n      \"properties\": {\n        \"metrics\": [\n          [ \"AWS/SQS\", \"NumberOfMessagesSent\", \"QueueName\", \"procesar-imagen-cola-staging.fifo\" ],\n          [ \".\", \"NumberOfMessagesReceived\", \".\", \".\" ]\n        ],\n        \"period\": 300,\n        \"stat\": \"Sum\",\n        \"region\": \"us-east-1\",\n        \"title\": \"SQS (staging): Mensajes\"\n      }\n    }\n  ]\n}\n"
+                }
               }
             }
           },
@@ -429,25 +478,25 @@
             "ServerlessDeploymentBucketName": {
               "Value": "serverless-framework-deployments-us-east-1-55341aaa-4275",
               "Export": {
-                "Name": "sls-nest-serverless-app-dev-ServerlessDeploymentBucketName"
-              }
-            },
-            "MainLambdaFunctionQualifiedArn": {
-              "Description": "Current Lambda function version",
-              "Value": {
-                "Ref": "MainLambdaVersionwIn56udtghwC0ae1t3WN2FCrD0rCBmy79ShNe8JWw"
-              },
-              "Export": {
-                "Name": "sls-nest-serverless-app-dev-MainLambdaFunctionQualifiedArn"
+                "Name": "sls-nest-serverless-app-staging-ServerlessDeploymentBucketName"
               }
             },
             "ImageProcessorLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "ImageProcessorLambdaVersionoDCrMqhx2QSAcakjRAKqTpqPKs5mFq7IwK4oWwN48"
+                "Ref": "ImageProcessorLambdaVersionL5yoWRgrjZ0eUmpKz2eVyCWmiA1BlJPCmbHuo3eUdfo"
               },
               "Export": {
-                "Name": "sls-nest-serverless-app-dev-ImageProcessorLambdaFunctionQualifiedArn"
+                "Name": "sls-nest-serverless-app-staging-ImageProcessorLambdaFunctionQualifiedArn"
+              }
+            },
+            "MainLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "MainLambdaVersionWSFQRtMTSRKKOolMoo4buo9V5kEtSaV8kNvvPs0v6EY"
+              },
+              "Export": {
+                "Name": "sls-nest-serverless-app-staging-MainLambdaFunctionQualifiedArn"
               }
             },
             "ServiceEndpoint": {
@@ -468,12 +517,12 @@
                     {
                       "Ref": "AWS::URLSuffix"
                     },
-                    "/dev"
+                    "/staging"
                   ]
                 ]
               },
               "Export": {
-                "Name": "sls-nest-serverless-app-dev-ServiceEndpoint"
+                "Name": "sls-nest-serverless-app-staging-ServiceEndpoint"
               }
             }
           }
@@ -485,15 +534,12 @@
         "patterns": [
           "!**",
           "package.json",
-          "node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node",
-          "node_modules/.prisma/client/schema.prisma",
-          "node_modules/@prisma/client/**",
-          "node_modules/@prisma/adapter-pg/**",
+          "dist/**",
           "node_modules/pg*/**",
           "node_modules/postgres*/**",
           "node_modules/xtend/**"
         ],
-        "artifactsS3KeyDirname": "serverless/nest-serverless-app/dev/code-artifacts",
+        "artifactsS3KeyDirname": "serverless/nest-serverless-app/staging/code-artifacts",
         "deploymentBucket": "serverless-framework-deployments-us-east-1-55341aaa-4275"
       },
       "functions": {
@@ -508,7 +554,7 @@
               }
             }
           ],
-          "name": "nest-serverless-app-dev-main",
+          "name": "nest-serverless-app-staging-main",
           "package": {
             "artifact": ".serverless\\main.zip"
           },
@@ -516,7 +562,7 @@
           "timeout": 6,
           "runtime": "nodejs20.x",
           "vpc": {},
-          "versionLogicalId": "MainLambdaVersionwIn56udtghwC0ae1t3WN2FCrD0rCBmy79ShNe8JWw"
+          "versionLogicalId": "MainLambdaVersionWSFQRtMTSRKKOolMoo4buo9V5kEtSaV8kNvvPs0v6EY"
         },
         "imageProcessor": {
           "handler": "src/lambdas/image-processor.handler",
@@ -533,7 +579,7 @@
               }
             }
           ],
-          "name": "nest-serverless-app-dev-imageProcessor",
+          "name": "nest-serverless-app-staging-imageProcessor",
           "package": {
             "artifact": ".serverless\\imageProcessor.zip"
           },
@@ -541,7 +587,7 @@
           "timeout": 6,
           "runtime": "nodejs20.x",
           "vpc": {},
-          "versionLogicalId": "ImageProcessorLambdaVersionoDCrMqhx2QSAcakjRAKqTpqPKs5mFq7IwK4oWwN48"
+          "versionLogicalId": "ImageProcessorLambdaVersionL5yoWRgrjZ0eUmpKz2eVyCWmiA1BlJPCmbHuo3eUdfo"
         }
       },
       "resources": {
@@ -549,23 +595,64 @@
           "MyQueue": {
             "Type": "AWS::SQS::Queue",
             "Properties": {
-              "QueueName": "procesar-imagen-cola.fifo",
+              "QueueName": "procesar-imagen-cola-staging.fifo",
               "FifoQueue": true,
               "ContentBasedDeduplication": true
+            }
+          },
+          "FotosBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "fotos-ingcompjorge-stage"
+            }
+          },
+          "MyDeadLetterQueue": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+              "QueueName": "procesar-imagen-error-staging.fifo",
+              "FifoQueue": true,
+              "MessageRetentionPeriod": 1209600
+            }
+          },
+          "MyDashboard": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+              "DashboardName": {
+                "Fn::Sub": "Metrics-staging-App"
+              },
+              "DashboardBody": {
+                "Fn::Sub": "{\n  \"widgets\": [\n    {\n      \"type\": \"metric\",\n      \"x\": 0, \"y\": 0, \"width\": 12, \"height\": 6,\n      \"properties\": {\n        \"metrics\": [\n          [ \"AWS/Lambda\", \"Invocations\", \"FunctionName\", \"nest-serverless-app-staging-main\" ],\n          [ \".\", \"Errors\", \".\", \".\" ]\n        ],\n        \"period\": 300,\n        \"stat\": \"Sum\",\n        \"region\": \"us-east-1\",\n        \"title\": \"API (staging): Invocaciones vs Errores\"\n      }\n    },\n    {\n      \"type\": \"metric\",\n      \"x\": 12, \"y\": 0, \"width\": 12, \"height\": 6,\n      \"properties\": {\n        \"metrics\": [\n          [ \"AWS/SQS\", \"NumberOfMessagesSent\", \"QueueName\", \"procesar-imagen-cola-staging.fifo\" ],\n          [ \".\", \"NumberOfMessagesReceived\", \".\", \".\" ]\n        ],\n        \"period\": 300,\n        \"stat\": \"Sum\",\n        \"region\": \"us-east-1\",\n        \"title\": \"SQS (staging): Mensajes\"\n      }\n    }\n  ]\n}\n"
+              }
             }
           }
         },
         "Outputs": {}
       },
       "custom": {
+        "stages": {
+          "dev": {
+            "nodeEnv": "development",
+            "bucketName": "fotos-ingcompjorge-dev"
+          },
+          "staging": {
+            "nodeEnv": "staging",
+            "bucketName": "fotos-ingcompjorge-stage"
+          },
+          "prod": {
+            "nodeEnv": "production",
+            "bucketName": "fotos-ingcompjorge-prod"
+          }
+        },
         "serverless-offline": {
           "httpPort": 3000
         },
         "esbuild": {
           "bundle": true,
-          "minify": true,
+          "minify": false,
           "platform": "node",
           "target": "node20",
+          "keepNames": true,
+          "tsconfig": "tsconfig.json",
           "external": [
             "@aws-sdk/*",
             "class-transformer",
@@ -594,12 +681,12 @@
     "provider": {
       "name": "aws",
       "runtime": "nodejs20.x",
+      "stage": "staging",
       "region": "us-east-1",
-      "stage": "dev",
       "environment": {
-        "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-summer-mountain-ahpmekhk-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-        "S3_BUCKET_NAME": "fotos-bucket-IngCompJorge-2026",
-        "NODE_ENV": "production",
+        "NODE_ENV": "staging",
+        "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-odd-truth-ah146piu-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+        "S3_BUCKET_NAME": "fotos-ingcompjorge-stage",
         "SQS_QUEUE_URL": {
           "Ref": "MyQueue"
         }
@@ -615,19 +702,31 @@
                 "sqs:GetQueueAttributes",
                 "sqs:SendMessage"
               ],
-              "Resource": {
-                "Fn::GetAtt": [
-                  "MyQueue",
-                  "Arn"
-                ]
-              }
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "MyQueue",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::GetAtt": [
+                    "MyDeadLetterQueue",
+                    "Arn"
+                  ]
+                }
+              ]
             },
             {
               "Effect": "Allow",
               "Action": [
                 "s3:PutObject"
               ],
-              "Resource": "arn:aws:s3:::fotos-bucket-IngCompJorge-2026/*"
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:s3:::fotos-ingcompjorge-stage/*"
+                }
+              ]
             }
           ]
         }
@@ -640,13 +739,13 @@
           "MainLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/nest-serverless-app-dev-main"
+              "LogGroupName": "/aws/lambda/nest-serverless-app-staging-main"
             }
           },
           "ImageProcessorLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/nest-serverless-app-dev-imageProcessor"
+              "LogGroupName": "/aws/lambda/nest-serverless-app-staging-imageProcessor"
             }
           },
           "IamRoleLambdaExecution": {
@@ -675,7 +774,7 @@
                       "-",
                       [
                         "nest-serverless-app",
-                        "dev",
+                        "staging",
                         "lambda"
                       ]
                     ]
@@ -692,7 +791,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-dev*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-staging*:*"
                           }
                         ]
                       },
@@ -703,7 +802,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-dev*:*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-staging*:*:*"
                           }
                         ]
                       },
@@ -715,19 +814,31 @@
                           "sqs:GetQueueAttributes",
                           "sqs:SendMessage"
                         ],
-                        "Resource": {
-                          "Fn::GetAtt": [
-                            "MyQueue",
-                            "Arn"
-                          ]
-                        }
+                        "Resource": [
+                          {
+                            "Fn::GetAtt": [
+                              "MyQueue",
+                              "Arn"
+                            ]
+                          },
+                          {
+                            "Fn::GetAtt": [
+                              "MyDeadLetterQueue",
+                              "Arn"
+                            ]
+                          }
+                        ]
                       },
                       {
                         "Effect": "Allow",
                         "Action": [
                           "s3:PutObject"
                         ],
-                        "Resource": "arn:aws:s3:::fotos-bucket-IngCompJorge-2026/*"
+                        "Resource": [
+                          {
+                            "Fn::Sub": "arn:aws:s3:::fotos-ingcompjorge-stage/*"
+                          }
+                        ]
                       },
                       {
                         "Effect": "Allow",
@@ -755,7 +866,7 @@
                   "-",
                   [
                     "nest-serverless-app",
-                    "dev",
+                    "staging",
                     {
                       "Ref": "AWS::Region"
                     },
@@ -770,18 +881,18 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-55341aaa-4275",
-                "S3Key": "serverless/nest-serverless-app/dev/1769785736469-2026-01-30T15:08:56.469Z/main.zip"
+                "S3Key": "serverless/nest-serverless-app/staging/1770066043978-2026-02-02T21:00:43.978Z/main.zip"
               },
               "Handler": "src/lambdas/api.handler",
               "Runtime": "nodejs20.x",
-              "FunctionName": "nest-serverless-app-dev-main",
+              "FunctionName": "nest-serverless-app-staging-main",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
                 "Variables": {
-                  "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-summer-mountain-ahpmekhk-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-                  "S3_BUCKET_NAME": "fotos-bucket-IngCompJorge-2026",
-                  "NODE_ENV": "production",
+                  "NODE_ENV": "staging",
+                  "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-odd-truth-ah146piu-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+                  "S3_BUCKET_NAME": "fotos-ingcompjorge-stage",
                   "SQS_QUEUE_URL": {
                     "Ref": "MyQueue"
                   }
@@ -803,18 +914,18 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-55341aaa-4275",
-                "S3Key": "serverless/nest-serverless-app/dev/1769785736469-2026-01-30T15:08:56.469Z/imageProcessor.zip"
+                "S3Key": "serverless/nest-serverless-app/staging/1770066043978-2026-02-02T21:00:43.978Z/imageProcessor.zip"
               },
               "Handler": "src/lambdas/image-processor.handler",
               "Runtime": "nodejs20.x",
-              "FunctionName": "nest-serverless-app-dev-imageProcessor",
+              "FunctionName": "nest-serverless-app-staging-imageProcessor",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
                 "Variables": {
-                  "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-summer-mountain-ahpmekhk-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-                  "S3_BUCKET_NAME": "fotos-bucket-IngCompJorge-2026",
-                  "NODE_ENV": "production",
+                  "NODE_ENV": "staging",
+                  "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-odd-truth-ah146piu-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+                  "S3_BUCKET_NAME": "fotos-ingcompjorge-stage",
                   "SQS_QUEUE_URL": {
                     "Ref": "MyQueue"
                   }
@@ -831,30 +942,30 @@
               "ImageProcessorLogGroup"
             ]
           },
-          "MainLambdaVersionwIn56udtghwC0ae1t3WN2FCrD0rCBmy79ShNe8JWw": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "MainLambdaFunction"
-              },
-              "CodeSha256": "qUhfg2WN0fSyvqvQMKIqxcCqL6c/AXC/egZTFSqPHuA="
-            }
-          },
-          "ImageProcessorLambdaVersionoDCrMqhx2QSAcakjRAKqTpqPKs5mFq7IwK4oWwN48": {
+          "ImageProcessorLambdaVersionL5yoWRgrjZ0eUmpKz2eVyCWmiA1BlJPCmbHuo3eUdfo": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ImageProcessorLambdaFunction"
               },
-              "CodeSha256": "sefD5psMk+IAznLyOydMK9HzMErTBeMS3DO2e+Ubgpk="
+              "CodeSha256": "y7wZDIe779qNEKgB6dsU/PFFBxrwJQqPiPjBgOiEiys="
+            }
+          },
+          "MainLambdaVersionWSFQRtMTSRKKOolMoo4buo9V5kEtSaV8kNvvPs0v6EY": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "MainLambdaFunction"
+              },
+              "CodeSha256": "Dka6ZJ4/PE77216HJDK9Vwq/3we0hf1CTi3xvcq6ARk="
             }
           },
           "ApiGatewayRestApi": {
             "Type": "AWS::ApiGateway::RestApi",
             "Properties": {
-              "Name": "dev-nest-serverless-app",
+              "Name": "staging-nest-serverless-app",
               "EndpointConfiguration": {
                 "Types": [
                   "EDGE"
@@ -924,13 +1035,13 @@
               "MainLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1769785726137": {
+          "ApiGatewayDeployment1770066034683": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               },
-              "StageName": "dev"
+              "StageName": "staging"
             },
             "DependsOn": [
               "ApiGatewayMethodProxyVarAny"
@@ -998,9 +1109,34 @@
           "MyQueue": {
             "Type": "AWS::SQS::Queue",
             "Properties": {
-              "QueueName": "procesar-imagen-cola.fifo",
+              "QueueName": "procesar-imagen-cola-staging.fifo",
               "FifoQueue": true,
               "ContentBasedDeduplication": true
+            }
+          },
+          "FotosBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "fotos-ingcompjorge-stage"
+            }
+          },
+          "MyDeadLetterQueue": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+              "QueueName": "procesar-imagen-error-staging.fifo",
+              "FifoQueue": true,
+              "MessageRetentionPeriod": 1209600
+            }
+          },
+          "MyDashboard": {
+            "Type": "AWS::CloudWatch::Dashboard",
+            "Properties": {
+              "DashboardName": {
+                "Fn::Sub": "Metrics-staging-App"
+              },
+              "DashboardBody": {
+                "Fn::Sub": "{\n  \"widgets\": [\n    {\n      \"type\": \"metric\",\n      \"x\": 0, \"y\": 0, \"width\": 12, \"height\": 6,\n      \"properties\": {\n        \"metrics\": [\n          [ \"AWS/Lambda\", \"Invocations\", \"FunctionName\", \"nest-serverless-app-staging-main\" ],\n          [ \".\", \"Errors\", \".\", \".\" ]\n        ],\n        \"period\": 300,\n        \"stat\": \"Sum\",\n        \"region\": \"us-east-1\",\n        \"title\": \"API (staging): Invocaciones vs Errores\"\n      }\n    },\n    {\n      \"type\": \"metric\",\n      \"x\": 12, \"y\": 0, \"width\": 12, \"height\": 6,\n      \"properties\": {\n        \"metrics\": [\n          [ \"AWS/SQS\", \"NumberOfMessagesSent\", \"QueueName\", \"procesar-imagen-cola-staging.fifo\" ],\n          [ \".\", \"NumberOfMessagesReceived\", \".\", \".\" ]\n        ],\n        \"period\": 300,\n        \"stat\": \"Sum\",\n        \"region\": \"us-east-1\",\n        \"title\": \"SQS (staging): Mensajes\"\n      }\n    }\n  ]\n}\n"
+              }
             }
           }
         },
@@ -1008,25 +1144,25 @@
           "ServerlessDeploymentBucketName": {
             "Value": "serverless-framework-deployments-us-east-1-55341aaa-4275",
             "Export": {
-              "Name": "sls-nest-serverless-app-dev-ServerlessDeploymentBucketName"
-            }
-          },
-          "MainLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "MainLambdaVersionwIn56udtghwC0ae1t3WN2FCrD0rCBmy79ShNe8JWw"
-            },
-            "Export": {
-              "Name": "sls-nest-serverless-app-dev-MainLambdaFunctionQualifiedArn"
+              "Name": "sls-nest-serverless-app-staging-ServerlessDeploymentBucketName"
             }
           },
           "ImageProcessorLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ImageProcessorLambdaVersionoDCrMqhx2QSAcakjRAKqTpqPKs5mFq7IwK4oWwN48"
+              "Ref": "ImageProcessorLambdaVersionL5yoWRgrjZ0eUmpKz2eVyCWmiA1BlJPCmbHuo3eUdfo"
             },
             "Export": {
-              "Name": "sls-nest-serverless-app-dev-ImageProcessorLambdaFunctionQualifiedArn"
+              "Name": "sls-nest-serverless-app-staging-ImageProcessorLambdaFunctionQualifiedArn"
+            }
+          },
+          "MainLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "MainLambdaVersionWSFQRtMTSRKKOolMoo4buo9V5kEtSaV8kNvvPs0v6EY"
+            },
+            "Export": {
+              "Name": "sls-nest-serverless-app-staging-MainLambdaFunctionQualifiedArn"
             }
           },
           "ServiceEndpoint": {
@@ -1047,12 +1183,12 @@
                   {
                     "Ref": "AWS::URLSuffix"
                   },
-                  "/dev"
+                  "/staging"
                 ]
               ]
             },
             "Export": {
-              "Name": "sls-nest-serverless-app-dev-ServiceEndpoint"
+              "Name": "sls-nest-serverless-app-staging-ServiceEndpoint"
             }
           }
         }
@@ -1068,44 +1204,46 @@
       "serviceProvider": null,
       "instanceParameters": null
     },
-    "serviceRawFile": "service: nest-serverless-app\r\n\r\nplugins:\r\n  - serverless-esbuild\r\n  - serverless-offline\r\n\r\nbuild:\r\n  esbuild: false # Desactiva el motor nativo de la v4 para usar el plugin\r\n\r\nprovider:\r\n  name: aws\r\n  runtime: nodejs20.x\r\n  region: us-east-1\r\n  stage: dev\r\n  environment:\r\n    DATABASE_URL: ${env:DATABASE_URL}\r\n    S3_BUCKET_NAME: \"fotos-bucket-IngCompJorge-2026\"\r\n    NODE_ENV: \"production\"\r\n    SQS_QUEUE_URL: !Ref MyQueue\r\n  iam:\r\n    role:\r\n      statements:\r\n        - Effect: Allow\r\n          Action: [sqs:ReceiveMessage, sqs:DeleteMessage, sqs:GetQueueAttributes, sqs:SendMessage]\r\n          Resource: !GetAtt MyQueue.Arn\r\n        - Effect: Allow\r\n          Action: [s3:PutObject]\r\n          Resource: \"arn:aws:s3:::fotos-bucket-IngCompJorge-2026/*\"\r\n\r\npackage:\r\n  individually: true\r\n  patterns:\r\n    - '!**'\r\n    - 'package.json'\r\n    - 'node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node'\r\n    - 'node_modules/.prisma/client/schema.prisma'\r\n    - 'node_modules/@prisma/client/**'\r\n    - 'node_modules/@prisma/adapter-pg/**'\r\n    - 'node_modules/pg*/**'\r\n    - 'node_modules/postgres*/**'\r\n    - 'node_modules/xtend/**'\r\n\r\nfunctions:\r\n  main:\r\n    handler: src/lambdas/api.handler\r\n    events:\r\n      - http: { method: any, path: '/{proxy+}' }\r\n  imageProcessor:\r\n    handler: src/lambdas/image-processor.handler\r\n    events:\r\n      - sqs:\r\n          arn: !GetAtt MyQueue.Arn\r\n          batchSize: 5\r\n\r\nresources:\r\n  Resources:\r\n    MyQueue:\r\n      Type: AWS::SQS::Queue\r\n      Properties:\r\n        QueueName: procesar-imagen-cola.fifo\r\n        FifoQueue: true\r\n        ContentBasedDeduplication: true\r\n\r\ncustom:\r\n  serverless-offline:\r\n    httpPort: 3000\r\n  esbuild:\r\n    bundle: true\r\n    minify: true\r\n    platform: 'node'\r\n    target: 'node20'\r\n    external:\r\n      # - '@prisma/client'\r\n      # - '.prisma'\r\n      - '@aws-sdk/*'\r\n      - 'class-transformer'\r\n      - 'class-validator'\r\n      - '@nestjs/microservices'\r\n      - '@nestjs/websockets'\r\n      - '@nestjs/websockets/socket-module'\r\n      - '@grpc/grpc-js'\r\n      - '@grpc/proto-loader'\r\n      - 'kafkajs'\r\n      - 'mqtt'\r\n      - 'amqplib'\r\n      - 'amqp-connection-manager'\r\n      - 'redis'\r\n      - 'ioredis'\r\n      - 'nats'\r\n      - 'cache-manager'\r\n    exclude: \r\n      - '*'\r\n    nativeZip: true\r\n",
+    "serviceRawFile": "service: nest-serverless-app\r\n\r\nplugins:\r\n  - serverless-esbuild\r\n  - serverless-offline\r\n\r\nbuild:\r\n  esbuild: false # Desactiva el motor nativo de la v4 para usar el plugin\r\n\r\nprovider:\r\n  name: aws\r\n  runtime: nodejs20.x\r\n  stage: ${opt:stage, 'dev'} # Toma el stage de la consola, por defecto 'dev'\r\n  region: us-east-1\r\n  environment:\r\n    # Busca en un archivo de variables según el stage\r\n    NODE_ENV: ${self:custom.stages.${self:provider.stage}.nodeEnv}\r\n    DATABASE_URL: ${env:DATABASE_URL_${self:provider.stage}} # Ej: DATABASE_URL_PROD\r\n    S3_BUCKET_NAME: ${self:custom.stages.${self:provider.stage}.bucketName}\r\n    SQS_QUEUE_URL: !Ref MyQueue\r\n  # name: aws\r\n  # runtime: nodejs20.x\r\n  # region: us-east-1\r\n  # stage: dev\r\n  # environment:\r\n  #   DATABASE_URL: ${env:DATABASE_URL}\r\n  #   S3_BUCKET_NAME: ${env:S3_BUCKET_NAME}\r\n  #   NODE_ENV: \"production\"\r\n  #   SQS_QUEUE_URL: !Ref MyQueue\r\n  iam:\r\n    role:\r\n      statements:\r\n        - Effect: Allow\r\n          Action: [sqs:ReceiveMessage, sqs:DeleteMessage, sqs:GetQueueAttributes, sqs:SendMessage]\r\n          Resource: \r\n            - !GetAtt MyQueue.Arn\r\n            - !GetAtt MyDeadLetterQueue.Arn\r\n        - Effect: Allow\r\n          Action: [s3:PutObject]\r\n          Resource: \r\n            - !Sub \"arn:aws:s3:::${self:provider.environment.S3_BUCKET_NAME}/*\"\r\n\r\npackage:\r\n  individually: true\r\n  patterns:\r\n    - '!**'\r\n    - 'package.json'\r\n    - 'dist/**'\r\n    - 'node_modules/pg*/**'\r\n    - 'node_modules/postgres*/**'\r\n    - 'node_modules/xtend/**'\r\n\r\nfunctions: ${file(./serverless/functions.yml)}\r\n  # main:\r\n  #   handler: src/lambdas/api.handler\r\n  #   events:\r\n  #     - http: { method: any, path: '/{proxy+}' }\r\n  # imageProcessor:\r\n  #   handler: src/lambdas/image-processor.handler\r\n  #   events:\r\n  #     - sqs:\r\n  #         arn: !GetAtt MyQueue.Arn\r\n  #         batchSize: 5\r\n\r\nresources:\r\n  Resources:\r\n    MyQueue:\r\n      Type: AWS::SQS::Queue\r\n      Properties:\r\n        QueueName: procesar-imagen-cola-${self:provider.stage}.fifo\r\n        FifoQueue: true\r\n        ContentBasedDeduplication: true\r\n    FotosBucket:\r\n      Type: AWS::S3::Bucket\r\n      Properties:\r\n        BucketName: ${self:provider.environment.S3_BUCKET_NAME}\r\n    MyDeadLetterQueue:\r\n      Type: AWS::SQS::Queue\r\n      Properties:\r\n        QueueName: procesar-imagen-error-${self:provider.stage}.fifo\r\n        FifoQueue: true\r\n        # Los mensajes aquí duran 14 días para que tengas tiempo de revisarlos\r\n        MessageRetentionPeriod: 1209600\r\n    MyDashboard:\r\n      Type: AWS::CloudWatch::Dashboard\r\n      Properties:\r\n        # El nombre del tablero también será dinámico\r\n        DashboardName: !Sub \"Metrics-${self:provider.stage}-App\"\r\n        DashboardBody: !Sub |\r\n          {\r\n            \"widgets\": [\r\n              {\r\n                \"type\": \"metric\",\r\n                \"x\": 0, \"y\": 0, \"width\": 12, \"height\": 6,\r\n                \"properties\": {\r\n                  \"metrics\": [\r\n                    [ \"AWS/Lambda\", \"Invocations\", \"FunctionName\", \"${self:service}-${self:provider.stage}-main\" ],\r\n                    [ \".\", \"Errors\", \".\", \".\" ]\r\n                  ],\r\n                  \"period\": 300,\r\n                  \"stat\": \"Sum\",\r\n                  \"region\": \"${self:provider.region}\",\r\n                  \"title\": \"API (${self:provider.stage}): Invocaciones vs Errores\"\r\n                }\r\n              },\r\n              {\r\n                \"type\": \"metric\",\r\n                \"x\": 12, \"y\": 0, \"width\": 12, \"height\": 6,\r\n                \"properties\": {\r\n                  \"metrics\": [\r\n                    [ \"AWS/SQS\", \"NumberOfMessagesSent\", \"QueueName\", \"procesar-imagen-cola-${self:provider.stage}.fifo\" ],\r\n                    [ \".\", \"NumberOfMessagesReceived\", \".\", \".\" ]\r\n                  ],\r\n                  \"period\": 300,\r\n                  \"stat\": \"Sum\",\r\n                  \"region\": \"${self:provider.region}\",\r\n                  \"title\": \"SQS (${self:provider.stage}): Mensajes\"\r\n                }\r\n              }\r\n            ]\r\n          }\r\ncustom:\r\n  stages:\r\n    dev:\r\n      nodeEnv: \"development\"\r\n      bucketName: \"fotos-ingcompjorge-dev\"\r\n    staging:\r\n      nodeEnv: \"staging\"\r\n      bucketName: \"fotos-ingcompjorge-stage\"\r\n    prod:\r\n      nodeEnv: \"production\"\r\n      bucketName: \"fotos-ingcompjorge-prod\"\r\n  serverless-offline:\r\n    httpPort: 3000\r\n  esbuild:\r\n    bundle: true\r\n    minify: false\r\n    platform: 'node'\r\n    target: 'node20'\r\n    keepNames: true\r\n    tsconfig: 'tsconfig.json'\r\n    external:\r\n      - '@aws-sdk/*'\r\n      - 'class-transformer'\r\n      - 'class-validator'\r\n      - '@nestjs/microservices'\r\n      - '@nestjs/websockets'\r\n      - '@nestjs/websockets/socket-module'\r\n      - '@grpc/grpc-js'\r\n      - '@grpc/proto-loader'\r\n      - 'kafkajs'\r\n      - 'mqtt'\r\n      - 'amqplib'\r\n      - 'amqp-connection-manager'\r\n      - 'redis'\r\n      - 'ioredis'\r\n      - 'nats'\r\n      - 'cache-manager'\r\n    exclude: \r\n      - '*'\r\n    nativeZip: true\r\n",
     "command": [
       "deploy"
     ],
-    "options": {},
+    "options": {
+      "stage": "staging"
+    },
     "orgId": "b7f08a8c-d71f-4285-b361-dd7dfc3e59fc",
     "orgName": "jorge2025",
     "userId": "6ldWRyQH6zmGknqQDS",
     "userName": "jorge2025",
     "serviceProviderAwsAccountId": "592451844320",
-    "serviceProviderAwsCfStackName": "nest-serverless-app-dev",
-    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:592451844320:stack/nest-serverless-app-dev/ac369d70-fd65-11f0-85d4-0ed01b5aa809",
-    "serviceProviderAwsCfStackCreated": "2026-01-29T22:55:57.246Z",
-    "serviceProviderAwsCfStackUpdated": "2026-01-30T15:02:21.631Z",
-    "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
+    "serviceProviderAwsCfStackName": "nest-serverless-app-staging",
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:592451844320:stack/nest-serverless-app-staging/4446d960-007a-11f1-a802-0e34a92540e5",
+    "serviceProviderAwsCfStackCreated": "2026-02-02T21:00:55.793Z",
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": "CREATE_COMPLETE",
     "serviceProviderAwsCfStackOutputs": [
       {
         "OutputKey": "MainLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:592451844320:function:nest-serverless-app-dev-main:12",
+        "OutputValue": "arn:aws:lambda:us-east-1:592451844320:function:nest-serverless-app-staging-main:1",
         "Description": "Current Lambda function version",
-        "ExportName": "sls-nest-serverless-app-dev-MainLambdaFunctionQualifiedArn"
+        "ExportName": "sls-nest-serverless-app-staging-MainLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "ImageProcessorLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:592451844320:function:nest-serverless-app-dev-imageProcessor:12",
+        "OutputValue": "arn:aws:lambda:us-east-1:592451844320:function:nest-serverless-app-staging-imageProcessor:1",
         "Description": "Current Lambda function version",
-        "ExportName": "sls-nest-serverless-app-dev-ImageProcessorLambdaFunctionQualifiedArn"
+        "ExportName": "sls-nest-serverless-app-staging-ImageProcessorLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "ServiceEndpoint",
-        "OutputValue": "https://mweee2502d.execute-api.us-east-1.amazonaws.com/dev",
+        "OutputValue": "https://in7j2exfza.execute-api.us-east-1.amazonaws.com/staging",
         "Description": "URL of the service endpoint",
-        "ExportName": "sls-nest-serverless-app-dev-ServiceEndpoint"
+        "ExportName": "sls-nest-serverless-app-staging-ServiceEndpoint"
       },
       {
         "OutputKey": "ServerlessDeploymentBucketName",
         "OutputValue": "serverless-framework-deployments-us-east-1-55341aaa-4275",
-        "ExportName": "sls-nest-serverless-app-dev-ServerlessDeploymentBucketName"
+        "ExportName": "sls-nest-serverless-app-staging-ServerlessDeploymentBucketName"
       }
     ],
     "compiledCloudFormationTemplate": {
@@ -1115,13 +1253,13 @@
         "MainLogGroup": {
           "Type": "AWS::Logs::LogGroup",
           "Properties": {
-            "LogGroupName": "/aws/lambda/nest-serverless-app-dev-main"
+            "LogGroupName": "/aws/lambda/nest-serverless-app-staging-main"
           }
         },
         "ImageProcessorLogGroup": {
           "Type": "AWS::Logs::LogGroup",
           "Properties": {
-            "LogGroupName": "/aws/lambda/nest-serverless-app-dev-imageProcessor"
+            "LogGroupName": "/aws/lambda/nest-serverless-app-staging-imageProcessor"
           }
         },
         "IamRoleLambdaExecution": {
@@ -1150,7 +1288,7 @@
                     "-",
                     [
                       "nest-serverless-app",
-                      "dev",
+                      "staging",
                       "lambda"
                     ]
                   ]
@@ -1167,7 +1305,7 @@
                       ],
                       "Resource": [
                         {
-                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-dev*:*"
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-staging*:*"
                         }
                       ]
                     },
@@ -1178,7 +1316,7 @@
                       ],
                       "Resource": [
                         {
-                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-dev*:*:*"
+                          "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/nest-serverless-app-staging*:*:*"
                         }
                       ]
                     },
@@ -1190,19 +1328,31 @@
                         "sqs:GetQueueAttributes",
                         "sqs:SendMessage"
                       ],
-                      "Resource": {
-                        "Fn::GetAtt": [
-                          "MyQueue",
-                          "Arn"
-                        ]
-                      }
+                      "Resource": [
+                        {
+                          "Fn::GetAtt": [
+                            "MyQueue",
+                            "Arn"
+                          ]
+                        },
+                        {
+                          "Fn::GetAtt": [
+                            "MyDeadLetterQueue",
+                            "Arn"
+                          ]
+                        }
+                      ]
                     },
                     {
                       "Effect": "Allow",
                       "Action": [
                         "s3:PutObject"
                       ],
-                      "Resource": "arn:aws:s3:::fotos-bucket-IngCompJorge-2026/*"
+                      "Resource": [
+                        {
+                          "Fn::Sub": "arn:aws:s3:::fotos-ingcompjorge-stage/*"
+                        }
+                      ]
                     },
                     {
                       "Effect": "Allow",
@@ -1230,7 +1380,7 @@
                 "-",
                 [
                   "nest-serverless-app",
-                  "dev",
+                  "staging",
                   {
                     "Ref": "AWS::Region"
                   },
@@ -1245,18 +1395,18 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-55341aaa-4275",
-              "S3Key": "serverless/nest-serverless-app/dev/1769785736469-2026-01-30T15:08:56.469Z/main.zip"
+              "S3Key": "serverless/nest-serverless-app/staging/1770066043978-2026-02-02T21:00:43.978Z/main.zip"
             },
             "Handler": "src/lambdas/api.handler",
             "Runtime": "nodejs20.x",
-            "FunctionName": "nest-serverless-app-dev-main",
+            "FunctionName": "nest-serverless-app-staging-main",
             "MemorySize": 1024,
             "Timeout": 6,
             "Environment": {
               "Variables": {
-                "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-summer-mountain-ahpmekhk-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-                "S3_BUCKET_NAME": "fotos-bucket-IngCompJorge-2026",
-                "NODE_ENV": "production",
+                "NODE_ENV": "staging",
+                "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-odd-truth-ah146piu-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+                "S3_BUCKET_NAME": "fotos-ingcompjorge-stage",
                 "SQS_QUEUE_URL": {
                   "Ref": "MyQueue"
                 }
@@ -1278,18 +1428,18 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-55341aaa-4275",
-              "S3Key": "serverless/nest-serverless-app/dev/1769785736469-2026-01-30T15:08:56.469Z/imageProcessor.zip"
+              "S3Key": "serverless/nest-serverless-app/staging/1770066043978-2026-02-02T21:00:43.978Z/imageProcessor.zip"
             },
             "Handler": "src/lambdas/image-processor.handler",
             "Runtime": "nodejs20.x",
-            "FunctionName": "nest-serverless-app-dev-imageProcessor",
+            "FunctionName": "nest-serverless-app-staging-imageProcessor",
             "MemorySize": 1024,
             "Timeout": 6,
             "Environment": {
               "Variables": {
-                "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-summer-mountain-ahpmekhk-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-                "S3_BUCKET_NAME": "fotos-bucket-IngCompJorge-2026",
-                "NODE_ENV": "production",
+                "NODE_ENV": "staging",
+                "DATABASE_URL": "postgresql://neondb_owner:npg_3DCrGaq8jQyx@ep-odd-truth-ah146piu-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+                "S3_BUCKET_NAME": "fotos-ingcompjorge-stage",
                 "SQS_QUEUE_URL": {
                   "Ref": "MyQueue"
                 }
@@ -1306,30 +1456,30 @@
             "ImageProcessorLogGroup"
           ]
         },
-        "MainLambdaVersionwIn56udtghwC0ae1t3WN2FCrD0rCBmy79ShNe8JWw": {
-          "Type": "AWS::Lambda::Version",
-          "DeletionPolicy": "Retain",
-          "Properties": {
-            "FunctionName": {
-              "Ref": "MainLambdaFunction"
-            },
-            "CodeSha256": "qUhfg2WN0fSyvqvQMKIqxcCqL6c/AXC/egZTFSqPHuA="
-          }
-        },
-        "ImageProcessorLambdaVersionoDCrMqhx2QSAcakjRAKqTpqPKs5mFq7IwK4oWwN48": {
+        "ImageProcessorLambdaVersionL5yoWRgrjZ0eUmpKz2eVyCWmiA1BlJPCmbHuo3eUdfo": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
               "Ref": "ImageProcessorLambdaFunction"
             },
-            "CodeSha256": "sefD5psMk+IAznLyOydMK9HzMErTBeMS3DO2e+Ubgpk="
+            "CodeSha256": "y7wZDIe779qNEKgB6dsU/PFFBxrwJQqPiPjBgOiEiys="
+          }
+        },
+        "MainLambdaVersionWSFQRtMTSRKKOolMoo4buo9V5kEtSaV8kNvvPs0v6EY": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "MainLambdaFunction"
+            },
+            "CodeSha256": "Dka6ZJ4/PE77216HJDK9Vwq/3we0hf1CTi3xvcq6ARk="
           }
         },
         "ApiGatewayRestApi": {
           "Type": "AWS::ApiGateway::RestApi",
           "Properties": {
-            "Name": "dev-nest-serverless-app",
+            "Name": "staging-nest-serverless-app",
             "EndpointConfiguration": {
               "Types": [
                 "EDGE"
@@ -1399,13 +1549,13 @@
             "MainLambdaPermissionApiGateway"
           ]
         },
-        "ApiGatewayDeployment1769785726137": {
+        "ApiGatewayDeployment1770066034683": {
           "Type": "AWS::ApiGateway::Deployment",
           "Properties": {
             "RestApiId": {
               "Ref": "ApiGatewayRestApi"
             },
-            "StageName": "dev"
+            "StageName": "staging"
           },
           "DependsOn": [
             "ApiGatewayMethodProxyVarAny"
@@ -1473,9 +1623,34 @@
         "MyQueue": {
           "Type": "AWS::SQS::Queue",
           "Properties": {
-            "QueueName": "procesar-imagen-cola.fifo",
+            "QueueName": "procesar-imagen-cola-staging.fifo",
             "FifoQueue": true,
             "ContentBasedDeduplication": true
+          }
+        },
+        "FotosBucket": {
+          "Type": "AWS::S3::Bucket",
+          "Properties": {
+            "BucketName": "fotos-ingcompjorge-stage"
+          }
+        },
+        "MyDeadLetterQueue": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "QueueName": "procesar-imagen-error-staging.fifo",
+            "FifoQueue": true,
+            "MessageRetentionPeriod": 1209600
+          }
+        },
+        "MyDashboard": {
+          "Type": "AWS::CloudWatch::Dashboard",
+          "Properties": {
+            "DashboardName": {
+              "Fn::Sub": "Metrics-staging-App"
+            },
+            "DashboardBody": {
+              "Fn::Sub": "{\n  \"widgets\": [\n    {\n      \"type\": \"metric\",\n      \"x\": 0, \"y\": 0, \"width\": 12, \"height\": 6,\n      \"properties\": {\n        \"metrics\": [\n          [ \"AWS/Lambda\", \"Invocations\", \"FunctionName\", \"nest-serverless-app-staging-main\" ],\n          [ \".\", \"Errors\", \".\", \".\" ]\n        ],\n        \"period\": 300,\n        \"stat\": \"Sum\",\n        \"region\": \"us-east-1\",\n        \"title\": \"API (staging): Invocaciones vs Errores\"\n      }\n    },\n    {\n      \"type\": \"metric\",\n      \"x\": 12, \"y\": 0, \"width\": 12, \"height\": 6,\n      \"properties\": {\n        \"metrics\": [\n          [ \"AWS/SQS\", \"NumberOfMessagesSent\", \"QueueName\", \"procesar-imagen-cola-staging.fifo\" ],\n          [ \".\", \"NumberOfMessagesReceived\", \".\", \".\" ]\n        ],\n        \"period\": 300,\n        \"stat\": \"Sum\",\n        \"region\": \"us-east-1\",\n        \"title\": \"SQS (staging): Mensajes\"\n      }\n    }\n  ]\n}\n"
+            }
           }
         }
       },
@@ -1483,25 +1658,25 @@
         "ServerlessDeploymentBucketName": {
           "Value": "serverless-framework-deployments-us-east-1-55341aaa-4275",
           "Export": {
-            "Name": "sls-nest-serverless-app-dev-ServerlessDeploymentBucketName"
-          }
-        },
-        "MainLambdaFunctionQualifiedArn": {
-          "Description": "Current Lambda function version",
-          "Value": {
-            "Ref": "MainLambdaVersionwIn56udtghwC0ae1t3WN2FCrD0rCBmy79ShNe8JWw"
-          },
-          "Export": {
-            "Name": "sls-nest-serverless-app-dev-MainLambdaFunctionQualifiedArn"
+            "Name": "sls-nest-serverless-app-staging-ServerlessDeploymentBucketName"
           }
         },
         "ImageProcessorLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "ImageProcessorLambdaVersionoDCrMqhx2QSAcakjRAKqTpqPKs5mFq7IwK4oWwN48"
+            "Ref": "ImageProcessorLambdaVersionL5yoWRgrjZ0eUmpKz2eVyCWmiA1BlJPCmbHuo3eUdfo"
           },
           "Export": {
-            "Name": "sls-nest-serverless-app-dev-ImageProcessorLambdaFunctionQualifiedArn"
+            "Name": "sls-nest-serverless-app-staging-ImageProcessorLambdaFunctionQualifiedArn"
+          }
+        },
+        "MainLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "MainLambdaVersionWSFQRtMTSRKKOolMoo4buo9V5kEtSaV8kNvvPs0v6EY"
+          },
+          "Export": {
+            "Name": "sls-nest-serverless-app-staging-MainLambdaFunctionQualifiedArn"
           }
         },
         "ServiceEndpoint": {
@@ -1522,12 +1697,12 @@
                 {
                   "Ref": "AWS::URLSuffix"
                 },
-                "/dev"
+                "/staging"
               ]
             ]
           },
           "Export": {
-            "Name": "sls-nest-serverless-app-dev-ServiceEndpoint"
+            "Name": "sls-nest-serverless-app-staging-ServiceEndpoint"
           }
         }
       }

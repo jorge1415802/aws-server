@@ -1,11 +1,14 @@
 import { Global, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config'
 import { S3Client } from '@aws-sdk/client-s3'
 import { SQSClient } from '@aws-sdk/client-sqs'
 import { FileModule } from './files/file/file.module';
+import { Kysely, PostgresDialect } from 'kysely';
+import type { Database } from './db/database.schema'
+import { Pool } from 'pg';
+
 
 @Global()
 @Module({
@@ -15,7 +18,6 @@ import { FileModule } from './files/file/file.module';
         // envFilePath: `.env` 
         ignoreEnvFile: process.env.NODE_ENV === 'production',
     }),
-    PrismaModule,
     FileModule
     
   ],
@@ -39,7 +41,20 @@ import { FileModule } from './files/file/file.module';
         // credentials: { accessKeyId: 'test', secretAccessKey: 'test' },
       }),
     },
+    {
+      provide: 'DATABASE_CONNECTION',
+      useFactory: () => {
+        return new Kysely<Database>({
+          dialect: new PostgresDialect({
+            pool : new Pool({
+              connectionString : process.env.DATABASE_URL,
+              ssl: { rejectUnauthorized : true }
+            })
+          })
+        })
+      }
+    }
   ],
-  exports: ['S3_CLIENT', 'SQS_CLIENT'],
+  exports: ['S3_CLIENT', 'SQS_CLIENT','DATABASE_CONNECTION'],
 })
 export class AppModule {}

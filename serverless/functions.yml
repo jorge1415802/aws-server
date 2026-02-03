@@ -1,0 +1,12 @@
+# serverless/functions.yml
+main:
+  handler: src/lambdas/api.handler
+  events:
+    - http: { method: any, path: '/{proxy+}' }
+
+imageProcessor:
+  handler: src/lambdas/image-processor.handler
+  events:
+    - sqs:
+        arn: !GetAtt MyQueue.Arn
+        batchSize: 5

@@ -7,5 +7,6 @@ import { SQSClient } from '@aws-sdk/client-sqs';
 @Module({
   controllers: [FileController],
   providers: [FileService],
+  exports: [FileService]
 })
 export class FileModule {}

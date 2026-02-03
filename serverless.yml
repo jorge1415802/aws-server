@@ -10,68 +10,136 @@ build:
 provider:
   name: aws
   runtime: nodejs20.x
+  stage: ${opt:stage, 'dev'} # Toma el stage de la consola, por defecto 'dev'
   region: us-east-1
-  stage: dev
   environment:
-    DATABASE_URL: ${env:DATABASE_URL}
-    S3_BUCKET_NAME: "fotos-bucket-IngCompJorge-2026"
-    NODE_ENV: "production"
+    # Busca en un archivo de variables según el stage
+    NODE_ENV: ${self:custom.stages.${self:provider.stage}.nodeEnv}
+    DATABASE_URL: ${env:DATABASE_URL_${self:provider.stage}} # Ej: DATABASE_URL_PROD
+    S3_BUCKET_NAME: ${self:custom.stages.${self:provider.stage}.bucketName}
     SQS_QUEUE_URL: !Ref MyQueue
+  # name: aws
+  # runtime: nodejs20.x
+  # region: us-east-1
+  # stage: dev
+  # environment:
+  #   DATABASE_URL: ${env:DATABASE_URL}
+  #   S3_BUCKET_NAME: ${env:S3_BUCKET_NAME}
+  #   NODE_ENV: "production"
+  #   SQS_QUEUE_URL: !Ref MyQueue
   iam:
     role:
       statements:
         - Effect: Allow
           Action: [sqs:ReceiveMessage, sqs:DeleteMessage, sqs:GetQueueAttributes, sqs:SendMessage]
-          Resource: !GetAtt MyQueue.Arn
+          Resource: 
+            - !GetAtt MyQueue.Arn
+            - !GetAtt MyDeadLetterQueue.Arn
         - Effect: Allow
           Action: [s3:PutObject]
-          Resource: "arn:aws:s3:::fotos-bucket-IngCompJorge-2026/*"
+          Resource: 
+            - !Sub "arn:aws:s3:::${self:provider.environment.S3_BUCKET_NAME}/*"
 
 package:
   individually: true
   patterns:
     - '!**'
     - 'package.json'
-    - 'node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node'
-    - 'node_modules/.prisma/client/schema.prisma'
-    - 'node_modules/@prisma/client/**'
-    - 'node_modules/@prisma/adapter-pg/**'
+    - 'dist/**'
     - 'node_modules/pg*/**'
     - 'node_modules/postgres*/**'
     - 'node_modules/xtend/**'
 
-functions:
-  main:
-    handler: src/lambdas/api.handler
-    events:
-      - http: { method: any, path: '/{proxy+}' }
-  imageProcessor:
-    handler: src/lambdas/image-processor.handler
-    events:
-      - sqs:
-          arn: !GetAtt MyQueue.Arn
-          batchSize: 5
+functions: ${file(./serverless/functions.yml)}
+  # main:
+  #   handler: src/lambdas/api.handler
+  #   events:
+  #     - http: { method: any, path: '/{proxy+}' }
+  # imageProcessor:
+  #   handler: src/lambdas/image-processor.handler
+  #   events:
+  #     - sqs:
+  #         arn: !GetAtt MyQueue.Arn
+  #         batchSize: 5
 
 resources:
   Resources:
     MyQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: procesar-imagen-cola.fifo
+        QueueName: procesar-imagen-cola-${self:provider.stage}.fifo
         FifoQueue: true
         ContentBasedDeduplication: true
-
+    FotosBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.S3_BUCKET_NAME}
+    MyDeadLetterQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: procesar-imagen-error-${self:provider.stage}.fifo
+        FifoQueue: true
+        # Los mensajes aquí duran 14 días para que tengas tiempo de revisarlos
+        MessageRetentionPeriod: 1209600
+    MyDashboard:
+      Type: AWS::CloudWatch::Dashboard
+      Properties:
+        # El nombre del tablero también será dinámico
+        DashboardName: !Sub "Metrics-${self:provider.stage}-App"
+        DashboardBody: !Sub |
+          {
+            "widgets": [
+              {
+                "type": "metric",
+                "x": 0, "y": 0, "width": 12, "height": 6,
+                "properties": {
+                  "metrics": [
+                    [ "AWS/Lambda", "Invocations", "FunctionName", "${self:service}-${self:provider.stage}-main" ],
+                    [ ".", "Errors", ".", "." ]
+                  ],
+                  "period": 300,
+                  "stat": "Sum",
+                  "region": "${self:provider.region}",
+                  "title": "API (${self:provider.stage}): Invocaciones vs Errores"
+                }
+              },
+              {
+                "type": "metric",
+                "x": 12, "y": 0, "width": 12, "height": 6,
+                "properties": {
+                  "metrics": [
+                    [ "AWS/SQS", "NumberOfMessagesSent", "QueueName", "procesar-imagen-cola-${self:provider.stage}.fifo" ],
+                    [ ".", "NumberOfMessagesReceived", ".", "." ]
+                  ],
+                  "period": 300,
+                  "stat": "Sum",
+                  "region": "${self:provider.region}",
+                  "title": "SQS (${self:provider.stage}): Mensajes"
+                }
+              }
+            ]
+          }
 custom:
+  stages:
+    dev:
+      nodeEnv: "development"
+      bucketName: "fotos-ingcompjorge-dev"
+    staging:
+      nodeEnv: "staging"
+      bucketName: "fotos-ingcompjorge-stage"
+    prod:
+      nodeEnv: "production"
+      bucketName: "fotos-ingcompjorge-prod"
   serverless-offline:
     httpPort: 3000
   esbuild:
     bundle: true
-    minify: true
+    minify: false
     platform: 'node'
     target: 'node20'
+    keepNames: true
+    tsconfig: 'tsconfig.json'
     external:
-      # - '@prisma/client'
-      # - '.prisma'
       - '@aws-sdk/*'
       - 'class-transformer'
       - 'class-validator'
