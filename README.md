@@ -42,7 +42,30 @@ $ npm run start:dev
 
 ```
 
+## Diagram
+
+graph TD
+    User[User / Client] -->|POST /image| API[API Gateway / Lambda]
+    API -->|Upload Image| S3[Amazon S3 Bucket]
+    S3 -->|S3 Event Notification| SQS[Amazon SQS Queue]
+    SQS -->|Trigger| Proc[Processing Lambda]
+    Proc -->|Get Image| S3
+    Proc -->|Metadata / Results| DB[(PostgreSQL - Neon)]
+    
+    subgraph "Infrastructure (Serverless Framework)"
+    API
+    S3
+    SQS
+    Proc
+    end
+
+    style User fill:#f9f,stroke:#333,stroke-width:2px
+    style S3 fill:#ff9900,stroke:#fff,color:#fff
+    style SQS fill:#ff4400,stroke:#fff,color:#fff
+    style API fill:#ff9900,stroke:#fff,color:#fff
+    style Proc fill:#ff9900,stroke:#fff,color:#fff
+    style DB fill:#336791,stroke:#fff,color:#fff
+
 ## Author
 - Rodriguez Jorge Luis
-
 
