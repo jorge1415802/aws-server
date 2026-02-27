@@ -44,6 +44,7 @@ $ npm run start:dev
 
 ## Diagram
 
+```mermaid
 graph TD
     User[User / Client] -->|POST /image| API[API Gateway / Lambda]
     API -->|Upload Image| S3[Amazon S3 Bucket]
@@ -58,13 +59,7 @@ graph TD
     SQS
     Proc
     end
-
-    style User fill:#f9f,stroke:#333,stroke-width:2px
-    style S3 fill:#ff9900,stroke:#fff,color:#fff
-    style SQS fill:#ff4400,stroke:#fff,color:#fff
-    style API fill:#ff9900,stroke:#fff,color:#fff
-    style Proc fill:#ff9900,stroke:#fff,color:#fff
-    style DB fill:#336791,stroke:#fff,color:#fff
+```
 
 ## Author
 - Rodriguez Jorge Luis
